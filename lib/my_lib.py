@@ -6,14 +6,46 @@ import requests
 load_dotenv() 
 TOKEN = os.environ.get("TOKEN")
 
-# Target coordinates
-CHIKEN_FARM = { "x": 0, "y": 1 }
-YELLOW_SLIME= { "x": 1,"y":-2 }
-COOKING = { "x": 1, "y": 1 }
-WEAPON_CRAFTING = { "x": 2, "y": 1 }
-BANK = { "x": 4, "y": 1 }
-COOPER_MINE = { "x": 2,"y": 0 }
+# tiles coordinates
 
+TILE_LIST={
+    "ZERO": { "x": 0, "y": 0 }, 
+    "MINING": { "x": 0, "y": 0 },
+    "CHIKEN":  { "x": 0, "y": 1 },
+    "YELLOW_SLIM":  { "x": 1,"y":-2 },
+    "COOKING":  { "x": 1, "y": 1 },
+    "WEAPON_CRAFTING":  { "x": 2, "y": 1 },
+    "BANK":  { "x": 4, "y": 1 },
+    "COPPER":  { "x": 2,"y": 0 },
+    "IRON":  { "x": 1, "y": 7 }, 
+    "COAL":  { "x": 1, "y": 6 },
+    "MINING":  { "x": 1, "y": 5 },
+}
+
+
+
+def arg_to_TILE(arg):
+    match arg: 
+        case "ZERO":
+            return ZERO
+        case "CHIKEN":
+            return CHIKEN 
+        case "YELLOW_SLIME":
+            return YELLOW_SLIME
+        case "COOKING":
+            return COOKING
+        case "WEAPON_CRAFTING":
+            return WEAPON_CRAFTING
+        case "BANK":
+            return BANK
+        case "COPPER":
+            return COPPER
+        case "IRON":
+            return IRON
+        case "COAL":
+            return COAL
+        case "MINING":
+            return MINING
 # the goat
 def request_builder(character,action,info):
     headers = {
@@ -56,6 +88,7 @@ def gathering(character):
 
 def move(character,destination):
     info = destination
+    print(f"destination : {destination}")
     data = request_builder(character,"move",info)
 
     if "error" in data:
