@@ -14,40 +14,28 @@ WEAPON_CRAFTING = { "x": 2, "y": 1 }
 BANK = { "x": 4, "y": 1 }
 COOPER_MINE = { "x": 2,"y": 0 }
 
-
-# GET functions
-def get_character(character):
-    url = f"https://api.artifactsmmo.com/characters/{character}"
+# the goat
+def request_builder(character,action,info):
     headers = {
         "Accept": "application/json",
+        "Content-Type": "application/json",
         "Authorization": f"Bearer {TOKEN}"
     }
-    try:
-        response = requests.get(url, headers=headers)
-        data = response.json()
 
-        if "error" in data:
-            raise Exception(data["error"]["message"])
-
-        print("Successfully fetched character.")
-        print(data["data"]["cooldown"]) 
-        sleep(data["data"]["cooldown"])
-    except Exception as e:
-        print(f"❌ {e}")
-    print("---")
-    return data
+    if info != "":
+        url = f"https://api.artifactsmmo.com/my/{character}/action/{action}"
+        response = requests.post(url, headers=headers, json=info)
+    else:
+        url = f"https://api.artifactsmmo.com/my/{character}/action/{action}"
+        response = requests.post(url, headers=headers)
+        
+    return response.json()
 
 
 # actions
 def gathering(character):
-    url = f"https://api.artifactsmmo.com/my/{character}/action/gathering"
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": f"Bearer {TOKEN}"
-    }
-    response = requests.post(url, headers=headers)
-    data = response.json()
+    info = "" 
+    data = request_builder(character,"gathering",info)
 
     if "error" in data:
         print(f"❌ {data["error"]["message"]}")
@@ -67,16 +55,8 @@ def gathering(character):
 
 
 def move(character,destination):
-    # API endpoint for the move action
-    url = f"https://api.artifactsmmo.com/my/{character}/action/move"
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {TOKEN}"
-    }
-
-    response = requests.post(url, headers=headers, json=destination)
-    data = response.json()
+    info = destination
+    data = request_builder(character,"move",info)
 
     if "error" in data:
         print(f"❌ {data["error"]["message"]}")
@@ -92,16 +72,8 @@ def move(character,destination):
     return data
 
 def fight(character):
-    # API endpoint to start a fight against the monster on the current tile
-    url = f"https://api.artifactsmmo.com/my/{character}/action/fight"
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {TOKEN}"
-    }
-    
-    response = requests.post(url, headers=headers)
-    data = response.json()
+    info = ""
+    data = request_builder(character,"fight",info)
 
     if "error" in data:
         print(f"❌ {data["error"]["message"]}")
@@ -122,49 +94,31 @@ def fight(character):
     return data
 
 def rest(character):
-    # API endpoint to make your character rest and recover HP
-    url = f"https://api.artifactsmmo.com/my/{character}/action/rest"
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {TOKEN}"
-    }
-    try:
-        response = requests.post(url, headers=headers)
-        data = response.json()
+    info = ""
+    data = request_builder(character,"rest",info)
 
-        if "error" in data:
-            raise Exception(data["error"]["message"])
+    if "error" in data:
+        print(f"❌ {data["error"]["message"]}")
+        return data 
 
-        hp_restored = data["data"]["hp_restored"]
-        character = data["data"]["character"]
-        cooldown = data["data"]["cooldown"]
+    hp_restored = data["data"]["hp_restored"]
+    character = data["data"]["character"]
+    cooldown = data["data"]["cooldown"]
 
-        print(f"🛏️   Rested and restored {hp_restored} HP.")
-        print(f"❤️  Current HP: {character['hp']}/{character['max_hp']}")
-        print(f"⏳ Cooldown started: {cooldown['total_seconds']} seconds")
-        sleep(cooldown['total_seconds'])
-    except Exception as e:
-        print(f"❌ {e}")
-    print("---")
+    print(f"🛏️   Rested and restored {hp_restored} HP.")
+    print(f"❤️  Current HP: {character['hp']}/{character['max_hp']}")
+    print(f"⏳ Cooldown started: {cooldown['total_seconds']} seconds")
+    sleep(cooldown['total_seconds'])
 
 def deposit_bank(character,code_item,quantity):
-    url = f"https://api.artifactsmmo.com/my/{character}/action/bank/deposit/item"
-    payload = [
+    info = [
         {
             "code": f"{code_item}",
             "quantity": quantity
         }
-    ]
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": f"Bearer {TOKEN}"
-    }
+    ] 
+    data = request_builder(character,"/bank/deposit/item",info)
 
-    response = requests.post(url, json=payload, headers=headers)
-    data = response.json()
-    
     if "error" in data:
         print(f"❌ {data["error"]["message"]}")
         return data 
@@ -178,36 +132,8 @@ def deposit_bank(character,code_item,quantity):
     print("---")
     return data
 
-def request_builder(character,action,info):
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {TOKEN}"
-    }
 
-    if info != "":
-        url = f"https://api.artifactsmmo.com/my/{character}/action/{action}"
-        response = requests.post(url, headers=headers, json=info)
-    else:
-        url = f"https://api.artifactsmmo.com/my/{character}/action/{action}"
-        response = requests.post(url, headers=headers)
-        
-    data = response.json()
-
-    # Catch l'erreur avant le traitement
-    if "error" in data:
-        print(f"❌ {data["error"]["message"]}")
-        return data 
-    
-    cooldown = data["data"]["cooldown"]
-    
-    print(f"{action} / {info}")
-    print(f"⏳ Cooldown started: {cooldown['total_seconds']} seconds")
-
-    sleep(cooldown['total_seconds'])
-    print("---")
-    return data
-    
+# pre build order    
 
 # send the sauce deep into the bank~
 def cuming_inventory_into_bank(character):

@@ -7,8 +7,8 @@ from lib.my_lib import *
 # .
 # .
 
-farming_zone = y_slime
-gathering_zone = cooper_mine
+farming_zone = YELLOW_SLIME
+gathering_zone = COOPER_MINE
 
 
 def mob_farming(character,zone):
@@ -36,3 +36,4 @@ def ressource_farming(character,zone):
 
 
 ressource_farming("char1",gathering_zone)
+
