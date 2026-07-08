@@ -7,12 +7,12 @@ load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 
 # Target coordinates
-chiken_farm = { "x": 0, "y": 1 }
-y_slime = { "x": 1,"y":-2 }
-cooking = { "x": 1, "y": 1 }
-weapon_crafting = { "x": 2, "y": 1 }
-bank = { "x": 4, "y": 1 }
-cooper_mine = { "x": 2,"y": 0 }
+CHIKEN_FARM = { "x": 0, "y": 1 }
+YELLOW_SLIME= { "x": 1,"y":-2 }
+COOKING = { "x": 1, "y": 1 }
+WEAPON_CRAFTING = { "x": 2, "y": 1 }
+BANK = { "x": 4, "y": 1 }
+COOPER_MINE = { "x": 2,"y": 0 }
 
 
 # GET functions
@@ -178,10 +178,40 @@ def deposit_bank(character,code_item,quantity):
     print("---")
     return data
 
+def request_builder(character,action,info):
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {TOKEN}"
+    }
+
+    if info != "":
+        url = f"https://api.artifactsmmo.com/my/{character}/action/{action}"
+        response = requests.post(url, headers=headers, json=info)
+    else:
+        url = f"https://api.artifactsmmo.com/my/{character}/action/{action}"
+        response = requests.post(url, headers=headers)
+        
+    data = response.json()
+
+    # Catch l'erreur avant le traitement
+    if "error" in data:
+        print(f"❌ {data["error"]["message"]}")
+        return data 
+    
+    cooldown = data["data"]["cooldown"]
+    
+    print(f"{action} / {info}")
+    print(f"⏳ Cooldown started: {cooldown['total_seconds']} seconds")
+
+    sleep(cooldown['total_seconds'])
+    print("---")
+    return data
+    
 
 # send the sauce deep into the bank~
 def cuming_inventory_into_bank(character):
-    data = move(character,bank)
+    data = move(character,BANK)
     i = 0
     for x in data["data"]["character"]["inventory"]:
         slot_x = data["data"]["character"]["inventory"][i]
