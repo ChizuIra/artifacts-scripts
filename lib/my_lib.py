@@ -1,8 +1,10 @@
-TOKEN = "token here" 
-
+import os
+from dotenv import load_dotenv
 from time import sleep
 import requests
 
+load_dotenv() 
+TOKEN = os.environ.get("TOKEN")
 
 # Target coordinates
 chiken_farm = { "x": 0, "y": 1 }
@@ -10,7 +12,7 @@ y_slime = { "x": 1,"y":-2 }
 cooking = { "x": 1, "y": 1 }
 weapon_crafting = { "x": 2, "y": 1 }
 bank = { "x": 4, "y": 1 }
-
+cooper_mine = { "x": 2,"y": 0 }
 
 
 # GET functions
@@ -35,7 +37,35 @@ def get_character(character):
     print("---")
     return data
 
+
 # actions
+def gathering(character):
+    url = f"https://api.artifactsmmo.com/my/{character}/action/gathering"
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": f"Bearer {TOKEN}"
+    }
+    response = requests.post(url, headers=headers)
+    data = response.json()
+
+    if "error" in data:
+        print(f"❌ {data["error"]["message"]}")
+        return data 
+
+    cooldown = data["data"]["cooldown"]
+    xp = data["data"]["details"]["xp"]
+
+    print(f"{data["data"]["details"]["items"]} for {xp}xp")
+    #print(f"✅ Gathering {quantity} {item} and gain {xp}xp")
+    print(f"⏳ Cooldown started: {cooldown['total_seconds']} seconds")
+
+    sleep(cooldown['total_seconds'])
+    print("---")
+    return data
+
+
+
 def move(character,destination):
     # API endpoint for the move action
     url = f"https://api.artifactsmmo.com/my/{character}/action/move"
